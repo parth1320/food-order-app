@@ -2,32 +2,13 @@ import Card from "../UI/Card";
 import MealItem from "./MealsItem/MealItem";
 import classes from "./Available.module.css";
 
-const DUMMY_MEALS = [
-  {
-    id: "m1",
-    name: "Sushi",
-    description: "Finest fish and veggies",
-    price: 22.99,
-  },
-  {
-    id: "m2",
-    name: "Schnitzel",
-    description: "A german specialty!",
-    price: 16.5,
-  },
-  {
-    id: "m3",
-    name: "Barbecue Burger",
-    description: "American, raw, meaty",
-    price: 12.99,
-  },
-  {
-    id: "m4",
-    name: "Green Bowl",
-    description: "Healthy...and green...",
-    price: 18.99,
-  },
-];
+const DUMMY_MEALS = async () => {
+  const response = await fetch(
+    "https://react-http-129a6-default-rtdb.firebaseio.com/meals.json",
+  );
+  const data = response.json();
+  console.log(data);
+};
 
 const AvialableMeals = () => {
   const mealsList = DUMMY_MEALS.map((meal) => (
