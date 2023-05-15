@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import Modal from "../UI/Modal";
 import CartItem from "./CartItem";
 import CartContext from "../../store/cart-context";
@@ -7,6 +7,8 @@ import Checkout from "./Checkout";
 
 const Cart = (props) => {
   const [CheckoutForm, setCheckoutForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
@@ -49,15 +51,51 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal onClick={props.onHideCart}>
+  const submitDataHandler = async (userData) => {
+    setIsSubmitting(true);
+    await fetch(
+      "https://react-http-129a6-default-rtdb.firebaseio.com/orders.json",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          user: userData,
+          orderedItems: cartCtx.items,
+        }),
+      },
+    );
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clearCart();
+  };
+
+  const cartModal = (
+    <React.Fragment>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      {CheckoutForm && <Checkout onCancel={props.onHideCart} />}
+      {CheckoutForm && (
+        <Checkout onConfirm={submitDataHandler} onCancel={props.onHideCart} />
+      )}
       {!CheckoutForm && modelActions}
+    </React.Fragment>
+  );
+
+  const cartSubmittingModal = <p>Sending Order Data...</p>;
+  const didSubmitModal = (
+    <React.Fragment>
+      <p>Successfully sent the order...</p>
+      <button className={classes.button} onClick={props.onHideCart}>
+        Cancel
+      </button>
+    </React.Fragment>
+  );
+  return (
+    <Modal onClick={props.onHideCart}>
+      {!isSubmitting && !didSubmit && cartModal}
+      {isSubmitting && cartSubmittingModal}
+      {didSubmit && !isSubmitting && didSubmitModal}
     </Modal>
   );
 };
